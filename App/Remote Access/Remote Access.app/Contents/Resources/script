@@ -24,7 +24,7 @@ LADomain=consulting.artichoke.RemoteAccess
 
 # Functions
 #logIt- Simple Logging snipit, seems to work well.
-function  {
+function logIt {
     echo "[`date`][${USER}] - ${*}" >> "$logfilePath"
 }
 
@@ -222,5 +222,6 @@ LaunchAgentRA
 testRootSG
 #Starts Simple Gateway as root regardless of v5.1.x or v5.2.x
 startSG
-logIt "---- $appName exit ----" 
+
+logIt "---- $appName v.$version exit ----" 
 exit 0

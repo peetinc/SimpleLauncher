@@ -24,7 +24,7 @@ LADomain=consulting.artichoke.RemoteAccess
 
 # Functions
 #logIt- Simple Logging snipit, seems to work well.
-function  {
+function logIt {
     echo "[`date`][${USER}] - ${*}" >> "$logfilePath"
 }
 
