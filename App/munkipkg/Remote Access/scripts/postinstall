@@ -1,0 +1,5 @@
+#!/bin/bash
+
+launchctl load /Library/LaunchDaemons/com.github.remoteaccess.install.plist
+
+exit 0

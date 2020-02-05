@@ -29,7 +29,7 @@
 	<key>IconPath</key>
 	<string>../icon/icon.icns</string>
 	<key>Identifier</key>
-	<string>consulting.artichoke.RemoteAccess</string>
+	<string>com.github.RemoteAccess</string>
 	<key>InterfaceType</key>
 	<string>None</string>
 	<key>InterpreterArgs</key>

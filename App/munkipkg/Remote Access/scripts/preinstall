@@ -1,0 +1,28 @@
+#!/bin/zsh
+plist="/Library/Preferences/com.github.remoteaccess.plist"
+serverURL="https://your.site.TLD"
+
+if [ ! -f $plist ] || [ `defaults read $plist serverURL` != serverURL ];then
+	defaults write $plist confirm no
+	defaults write $plist group "Your Group"
+	defaults write $plist monitor yes
+	#defaults write $plist password 
+	#defaults write $plist proxy 
+	defaults write $plist script yes
+	defaults write $plist serverURL $serverURL
+	defaults write $plist servers "udp://your.site.TLDg,udp://1.1.1.1,https://your.site.TLD"
+	defaults write $plist shortcuts no
+	defaults write $plist silent yes
+	
+	chown root:wheel $plist
+	chmod 644 $plist
+fi
+
+#cleanup if you happened to have installed before I generalized
+if [ -d /Library/Application\ Support/Artichoke/Remote\ Access.app ]; then
+	rm -rf /Library/Application\ Support/Artichoke/Remote\ Access.app
+	launchctl unload /Library/LaunchAgents/consulting.artichoke.RemoteAccess.plist
+	rm launchctl unload /Library/LaunchAgents/consulting.artichoke.RemoteAccess.plist
+fi
+ 
+exit 0
