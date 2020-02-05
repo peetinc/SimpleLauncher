@@ -10,4 +10,4 @@ Notes:
 
 Cheers.Peet
 
-![SimpleLauncher Logo](https://raw.githubusercontent.com/peetinc/SimpleLauncher/master/Code/icon/icon.png)
+![SimpleLauncher Logo](https://raw.githubusercontent.com/peetinc/SimpleLauncher/master/Code/Icons/icon.png)
