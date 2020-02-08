@@ -70,18 +70,6 @@ function LaunchAgentSG {
 		logIt "remove /Library/LaunchAgents/com.simplehelp.simplegateway.plist" 
 		rm "/Library/LaunchAgents/com.simplehelp.simplegateway.plist"
 	fi
-	if [ -f /Library/LaunchAgents/com.simplehelp.simplegateway.plist ]; then
-		logIt "SimpleGateway LaunchAgent found." 
-		launchctl asuser root launchctl list com.simplehelp.simplegateway > /dev/null 2>&1
-		loadedSG=$?
-		if [ $loadedSG = "0" ]; then
-			logIt "SimpleGateway LaunchAgent is loaded as root." 
-			logIt "Unload SimpleGateway LaunchAgent." 
-			launchctl asuser root launchctl unload /Library/LaunchAgents/com.simplehelp.simplegateway.plist 
-		fi
-		logIt "remove /Library/LaunchAgents/com.simplehelp.simplegateway.plist" 
-		rm "/Library/LaunchAgents/com.simplehelp.simplegateway.plist"
-	fi
 	}
 
 #LaunchAgentRA - test if our LaunchAgent exists, if not create it.
@@ -101,27 +89,30 @@ function LaunchAgentRA {
 	
 #killUserSG - If SimpleGateway is running as user as osxwrapper or osxlauncher, kill all PID's.
 function killUserSG {
-	PROC=( `pgrep -d \  -u $consoleUSER osxwrapper`)  #spacing is correct
-	for i in ${PROC[*]}; do
-		ps -o command= $i | grep $SGpath > /dev/null 2>&1 
-		isSG=$?
-		if [ $isSG = "0" ]; then
-			logIt "osxwrapper with PID $i is SimpleGateway running as $consoleUSER."  
-			logIt "kill $i" 
-			kill $i
-		fi
-	done
-
-	PROC=( `pgrep -d \  -u $consoleUSER osxlauncher`) #spacing is correct
-	for i in ${PROC[*]}; do
-		ps -o command= $i | grep $SGpath > /dev/null 2>&1 
-		isSG=$?
-		if [ $isSG = "0" ]; then
-			logIt "osxlauncher with PID $i is SimpleGateway running as $consoleUSER." 
-			logIt "kill $i" 
-			kill $i
-		fi
-	done
+	if [ $consoleUSER != "root" ]; then
+		PROC=( `pgrep -d \  -u $consoleUSER osxwrapper`)  #spacing is correct
+		for i in ${PROC[*]}; do
+			ps -o command= $i | grep $SGpath > /dev/null 2>&1 
+			isSG=$?
+			if [ $isSG = "0" ]; then
+				logIt "osxwrapper with PID $i is SimpleGateway running as $consoleUSER."  
+				logIt "kill $i" 
+				kill $i
+			fi
+		done
+	fi
+	if [ $consoleUSER != "root" ]; then
+		PROC=( `pgrep -d \  -u $consoleUSER osxlauncher`) #spacing is correct
+		for i in ${PROC[*]}; do
+			ps -o command= $i | grep $SGpath > /dev/null 2>&1 
+			isSG=$?
+			if [ $isSG = "0" ]; then
+				logIt "osxlauncher with PID $i is SimpleGateway running as $consoleUSER." 
+				logIt "kill $i" 
+				kill $i
+			fi
+		done
+	fi
 	}
 	
 #testRootSG - If SimpleGateway is running as osxwrapper or osxlauncher as root, if so it really should be us, exit 0.
