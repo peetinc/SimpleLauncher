@@ -166,7 +166,7 @@ function startSG {
 	
 # deploySG checks that SimpleHelp Gateway is installed and this app version is up to date, if either are not true we attempt a full reinstall
 function deploySG {
-	if [ ! -d "/Library/Application Support/JWrapper-Remote Access/JWAppsSharedConfig/SimpleGatewayService" ] || [ $version != $versionInstalled ]; then
+	if [ ! -d "/Library/Application Support/JWrapper-Remote Access/JWAppsSharedConfig/SimpleGatewayService" ]; then
 		if [ -f $plistPath ]; then
 		#ensure SimpleGateway launch agent is not deployed or running
 		LaunchAgentSG
@@ -223,6 +223,9 @@ function deploySG {
 		fi
 		
 		if [ $version -gt $versionInstalled ]; then
+			logIt "$installDir/$appName out of date. v.$versionInstalled will be updated to v.$version"
+			logIt "Removing $installDir/$appName"
+			rm -rf "$installDir/$appName"
 			logIt "Copying $appName to $installDir" 
 			ditto "../../../$appName" "$installDir/$appName" 
 			chown -R root:wheel "/Library/Application Support/$supportFolder"
