@@ -1,5 +1,51 @@
 #!/bin/bash
 
-launchctl load /Library/LaunchDaemons/com.github.remoteaccess.install.plist
+# Variables
+#---Change these if app is renamed or to rebrand
+#appName - full app bundle name, Remote Access.app
+appName="Remote Access.app"
+#machName - executable name in app/Contents/MacOS folder
+machName="Remote Access"
+#appDomain - LaunchAgent and app deploy preference
+appDomain="com.github.remoteaccess"
+#supportDirName - Name of /Library/Application Support folder and /Library/Logs Folder
+supportDirName="Remote Access"
 
-exit 0
+#---These variables are concatenations of above or required information gathering
+#installDir - where the Remote Access Launcher app will live
+installDir="/Library/Application Support/$supportDirName"
+#SGpath - Since all instances of SimpleGateway are osxwrapper or osxlauncher, something unique to grep for in `ps -o command= PID`
+SGpath51="SimpleGatewayService.app"
+SGpath52="Remote Access Service.app"
+#consoleUSER - find the currently logged in user in order to ensure LaunchAgent is not loaded.
+consoleUSER=`stat -f%Su /dev/console`
+consoleUID=`id -u $consoleUSER`
+#location for the Info.plist for running and installed app bundle once script is running as app, "../Info.plist"
+infoLocation="../Info.plist"
+#	version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$infoLocation")
+	versionInstalled=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$installDir/$appName/Contents/Info.plist")
+#location for Deployment Variables .var.plist, once the script is running as app, "../../../.vars.plist" is in the same directory as the app bundle.
+plistDir="/Library/Preferences"
+plistPath="$plistDir/$appDomain.plist"
+
+#loadLaunchDaemonRA - unloads and loads LaunchDemon to make sure deployment happens.
+function loadLaunchDaemonRA {
+touch "$installDir/.CleanUpInstall"
+
+launchctl load "/Library/LaunchDaemons/com.github.remoteaccess.install.plist"
+sleep 1
+PROC=( `pgrep -d \ -u root "$machName"`)
+isRunning=$?
+
+if [ $isRunning -eq 0 ];then
+	echo "$appName with PID $PROC is as root."
+	echo "---- $appName v.$versionInstalled exit 0 ----"
+	exit 0
+	else
+	echo "$appName is not running as root."
+	echo "---- $appName v.$versionInstalled exit 1 ----"
+	exit 1
+fi
+}
+
+loadLaunchDaemonRA

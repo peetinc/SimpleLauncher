@@ -1,28 +1,108 @@
-#!/bin/zsh
-plist="/Library/Preferences/com.github.remoteaccess.plist"
-serverURL="https://your.site.TLD"
+#!/bin/bash
 
-if [ ! -f $plist ] || [ `defaults read $plist serverURL` != serverURL ];then
-	defaults write $plist confirm no
-	defaults write $plist group "Your Group"
-	defaults write $plist monitor yes
-	#defaults write $plist password 
-	#defaults write $plist proxy 
-	defaults write $plist script yes
-	defaults write $plist serverURL $serverURL
-	defaults write $plist servers "udp://your.site.TLDg,udp://1.1.1.1,https://your.site.TLD"
-	defaults write $plist shortcuts no
-	defaults write $plist silent yes
+# Variables
+serviceConfig="/Library/Application Support/JWrapper-Remote Access/JWAppsSharedConfig/serviceconfig.xml"
+#---Change these if app is renamed or to rebrand make sure the primary script is updated accordingly
+#appDomain - LaunchAgent and app deploy preference
+appDomain="com.github.remoteaccess"
+#location for Deployment Variables .var.plist, once the script is running as app, "../../../.vars.plist" is in the same directory as the app bundle.
+plistDir="/Library/Preferences"
+plistPath="$plistDir/$appDomain.plist"
+#Installer LaunchDaemon Location
+launchdaemonPath="/Library/LaunchDaemons/$appDomain.install.plist"
+
+#SimpleHelp Deployment variables
+#serverURL SimpleHelp base server URL
+serverURL="https://YOUR.URL"
+#servers SimpleHelp servers listed as such "udp://your.server.tld,udp://1.1.1.1,https://your.server.tld"
+servers="udp://YOUR.URL,udp://1.1.1.1,https://YOUR.URL"
+#group Remote access deploy group "Deployed/Default"
+group="Default/"
+#silent Pretty much must be "yes"
+silent="yes"
+#shortcuts show the app or not. recommend "no"
+shortcuts="no"
+#confirm does the client need to allow connection from technician. recommend "no"
+confirm="no"
+#monitor can client be monitored outside of session. recommend "yes"
+monitor="yes"
+#script can scripts run outside of session. recommend "yes"
+script="yes"
+#proxy settings "username:password@server:port" or "server:port"
+proxy=""
+#password does the client need a password to connect 
+password=""
+
+#checkExistingPlist
+function checkExistingSettings {
+existingServerURL=`defaults read "$plistPath" serverURL`
+if [ -z "$existingServerURL" ]; then
+	existingServerURL="null"
+fi
+existingGroup=`defaults read "$plistPath" group`
+if [ -z "$existingGroup" ]; then
+	existingGroup="null"
+fi
+serviceConfigGroup=`xmllint --xpath "string(//Name)" "$serviceConfig" | awk 'BEGIN{OFS=FS="/"};{$NF=";print $0}'`
+if [ -z "$serviceConfigGroup" ]; then
+	serviceConfigGroup="null"
+fi
+}
+
+#writeLaunchDaemon - drop in install launchdaemon"
+function writeLaunchDaemon {
+if [ -f "$launchdaemonPath" ];then
+	launchctl unload "$launchdaemonPath" > /dev/null 2>&1
+	rm "$launchdaemonPath"
+	else
+	defaults write "$launchdaemonPath" Label "com.github.remoteaccess.install"
+	defaults write "$launchdaemonPath" ProgramArguments -array "/Library/Application Support/Remote Access/Remote Access.app/Contents/MacOS/Remote Access"
+	defaults write "$launchdaemonPath" RunAtLoad -bool true
+	defaults write "$launchdaemonPath" KeepAlive -bool false
 	
-	chown root:wheel $plist
-	chmod 644 $plist
+	chown root:wheel "$launchdaemonPath"
+	chmod 644 "$launchdaemonPath"
 fi
+}
 
-#cleanup if you happened to have installed before I generalized
-if [ -d /Library/Application\ Support/Artichoke/Remote\ Access.app ]; then
-	rm -rf /Library/Application\ Support/Artichoke/Remote\ Access.app
-	launchctl unload /Library/LaunchAgents/consulting.artichoke.RemoteAccess.plist
-	rm launchctl unload /Library/LaunchAgents/consulting.artichoke.RemoteAccess.plist
+#writeDeployPlist - write deployment variables to "$plistDir/$appDomain.plist"
+function writeDeployPlist {
+if [ ! -f "$plistPath" ] || [ "$existingServerURL" != "$serverURL" ] || [ "$existingGroup" != "$group" ] || [ "$serviceConfigGroup" != "null" ];then
+	
+	defaults write "$plistPath" serverURL "$serverURL"
+	defaults write "$plistPath" servers "$servers"
+	if [ "$serviceConfigGroup" = "null" ] && [ $existingGroup = "null" ];then
+	defaults write "$plistPath" group "$group"
+	fi
+	if [ "$existingGroup" != "null" ];then
+	defaults write "$plistPath" group "$existingGroup"
+	fi
+	if [ "$serviceConfigGroup" != "null" ];then
+	defaults write "$plistPath" group "$serviceConfigGroup"
+	fi
+	defaults write "$plistPath" silent "$silent"
+	defaults write "$plistPath" shortcuts "$shortcuts"
+	defaults write "$plistPath" confirm "$confirm"
+	defaults write "$plistPath" monitor "$monitor" 
+	defaults write "$plistPath" script "$script"
+	if [ -n "$proxy" ]; then
+		defaults write "$plistPath" proxy "$proxy"
+	fi
+	if [ -n "$password" ]; then
+		defaults write "$plistPath" password "$password"
+	fi
+	
+	chown root:wheel "$plistPath"
+	chmod 644 "$plistPath"
 fi
+if [ `defaults read "$plistPath" serverURL` != $serverURL ];then
+	echo "serverURL in $plistDir/$appDomain.plist is not $serverURL. Exit 1"
+	exit 1
+fi
+}
+
+checkExistingSettings
+writeDeployPlist
+writeLaunchDaemon
  
 exit 0
