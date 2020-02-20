@@ -1,4 +1,6 @@
 # SimpleLauncher
+2020.19.02 - Completely reworked and seems to work well now.
+
 A simple app to allow SimpleHelp to simply run as root on macOS.
 
 This project is the definition of As-Is.
