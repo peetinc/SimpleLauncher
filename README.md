@@ -8,7 +8,7 @@ This project is the definition of As-Is.
 Notes:
 * Make sure your download preferences make it into /Library/Preferences/com.github.remoteaccess.plist (everything is a string, no bool!)
 * Signed, but not notorized
-* Edit variables in preinstall script for munkipkg
+* Edit variables in preinstall script for munkipkg (/App/munkipkg/Remote Access/scripts/preinstall)
 * Use munkipkg to build deployable package after editing the preinstall script.
 * Test it on a VM or two.
 * Profit?
