@@ -1,5 +1,5 @@
 # SimpleLauncher
-**2020.19.02 - Completely reworked and seems to work well now.**
+**2020.23.02 - Completely reworked and seems to work well now. MacOS Catalina made some "?documented?" changes to launchc that blocks the running of LaunchAgents and LaunchDaemons at startup. v1.1.0 must be installed to and run from /Library/Application Support/Remote Access/Remote Access.app**
 
 A simple app to allow SimpleHelp to simply run as root on macOS.
 
