@@ -6,23 +6,11 @@
 	<dict>
 		<key>Resources/AppIcon.icns</key>
 		<data>
-		mVJyaOIR6vsiJJ8aYVh4q0SBpqI=
-		</data>
-		<key>Resources/AppSettings.plist</key>
-		<data>
-		lLRV0eS8b88LzxwVQinJWhdMspM=
-		</data>
-		<key>Resources/MainMenu.nib/designable.nib</key>
-		<data>
-		OkMFHqCxNH3z513DnSS7RKdg8FI=
-		</data>
-		<key>Resources/MainMenu.nib/keyedobjects.nib</key>
-		<data>
-		qklk27UeMFDEd9dWk7MPdSfD1VI=
+		9ItkvGHMlJ7j7G7C03S6A6kXnNY=
 		</data>
 		<key>Resources/script</key>
 		<data>
-		pcQLdQ5W2qhNZtxtCZ+yCL5VNYc=
+		1ctwwads/sQ0DHGfF2WX1j1SeFk=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -31,55 +19,22 @@
 		<dict>
 			<key>hash</key>
 			<data>
-			mVJyaOIR6vsiJJ8aYVh4q0SBpqI=
+			9ItkvGHMlJ7j7G7C03S6A6kXnNY=
 			</data>
 			<key>hash2</key>
 			<data>
-			/nohC13c4yXpqegxhgn4GSRV+Zbjwx0aBtYrS0B0hN8=
-			</data>
-		</dict>
-		<key>Resources/AppSettings.plist</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			lLRV0eS8b88LzxwVQinJWhdMspM=
-			</data>
-			<key>hash2</key>
-			<data>
-			08ntjkBfjsXjJVj+PwzGplbSNUDIe3gLqJIRUN7AJsg=
-			</data>
-		</dict>
-		<key>Resources/MainMenu.nib/designable.nib</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			OkMFHqCxNH3z513DnSS7RKdg8FI=
-			</data>
-			<key>hash2</key>
-			<data>
-			iR4INKFX8y7GY2wWVbI7n+3uFDwmFPNWW07xIo9Uzyk=
-			</data>
-		</dict>
-		<key>Resources/MainMenu.nib/keyedobjects.nib</key>
-		<dict>
-			<key>hash</key>
-			<data>
-			qklk27UeMFDEd9dWk7MPdSfD1VI=
-			</data>
-			<key>hash2</key>
-			<data>
-			MzCCEpaCkUq5bxboAU+DTCAYpRa1piLTv0U+qs3I5qk=
+			8bLRyq18I+NIVxmtRTMeX30CxJEUJBChf6ZC62FZA4c=
 			</data>
 		</dict>
 		<key>Resources/script</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			pcQLdQ5W2qhNZtxtCZ+yCL5VNYc=
+			1ctwwads/sQ0DHGfF2WX1j1SeFk=
 			</data>
 			<key>hash2</key>
 			<data>
-			24mcI/ICWuC1XKBgX9bhC4M4AO8mVbMIuVU9CUgbrys=
+			0Q3A18cNCa5aYu1czGc64gxYERkq70qw8M51zVZOAFY=
 			</data>
 		</dict>
 	</dict>

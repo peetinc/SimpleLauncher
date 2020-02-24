@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-#v.1.0.5
+#v.1.1.0
 
 # Variables
 #---Change these if app is renamed or to rebrand
@@ -60,35 +60,35 @@ function initializeLogging {
 if [ ! -f "$logPath" ]; then
 	if [ ! -d "$logDir" ]; then
 		mkdir -p "$logDir"
-		chown root:wheel "$logDir"
-		chmod 775 "$logDir"
 	fi
 	touch "$logPath"
-	chown root:wheel "$logPath"
-	chmod 664 "$logPath"
 	logIt "init $logPath"
 fi
+	chown root:wheel "$logDir"
+	chmod 775 "$logDir"
+	chown root:wheel "$logPath"
+	chmod 664 "$logPath"
 }
 
-#selfInstall - install in the correct directory
+#selfInstall - install in the correct directory (will not work until SimpleLauncher Mach-O is fixed)
 function selfInstall {
-if [ $doNotDelete -eq 0 ];then
-	logIt "$appName is running from $installDir/. Cannot/will not update."
-	return 0
-else
-	if [ `echo $version | sed -e 's/\.//g'` -gt `echo $versionInstalled | sed -e 's/\.//g'` ]; then
-		logIt "$installDir/$appName out of date. v.$versionInstalled will be updated to v.$version"
-		logIt "Removing $installDir/$appName"
-		rm -rf "$installDir/$appName"
-		logIt "Copying $appName to $installDir" 
-		ditto "../../../$appName" "$installDir/$appName" 
-		chown -R root:wheel "/Library/Application Support/$supportFolder"
-		chmod -R 755 "/Library/Application Support/$supportFolder"
-		versionInstalled=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$installDir/$appName/Contents/Info.plist")
-	
+	if [ $doNotDelete -eq 0 ];then
+		logIt "$appName is running from $installDir/. Cannot/will not update."
+		return 0
+	else
+		if [ `echo $version | sed -e 's/\.//g'` -gt `echo $versionInstalled | sed -e 's/\.//g'` ]; then
+			logIt "$installDir/$appName out of date. v.$versionInstalled will be updated to v.$version"
+			logIt "Removing $installDir/$appName"
+			rm -rf "$installDir/$appName"
+			logIt "Copying $appName to $installDir" 
+			ditto "../../../$appName" "$installDir/$appName" 
+			chown -R root:wheel "/Library/Application Support/$supportDirName"
+			chmod -R 755 "/Library/Application Support/$supportDirName"
+			versionInstalled=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$installDir/$appName/Contents/Info.plist")
+		
+		fi
 	fi
-fi
-}
+	}
 
 #LaunchAgentSG - test if LaunchAgent exists, unload if loaded, delete ("launchctl asuser" is a joy here).
 #   Also run in root context in case we're running at loginwindow after pkg deploy
@@ -110,51 +110,61 @@ function LaunchAgentSG {
 #LaunchDaemonRACleanup - Delete installer-required LuanchDaemon
 function LaunchDaemonRACleanup {
 	if [ ! -f "/Library/Application Support/$supportDirName/.CleanUpInstall" ]; then
-		if [ -f /Library/LaunchDaemons/com.github.remoteaccess.install.plist ]; then
-			logIt "Remote Access LaunchDaemon found." 
-			launchctl list com.github.remoteaccess.install > /dev/null 2>&1
-			loadedSG=$?
-			if [ $loadedSG = "0" ]; then
-				logIt "Remote Access LaunchDaemon loaded." 
-				logIt "Unload Remote Access LaunchDaemon." 
+		launchctl list com.github.remoteaccess.install > /dev/null 2>&1
+		loadedSG=$?
+		if [ $loadedSG = "0" ]; then
+			logIt "Remote Access LaunchDaemon loaded." 
+			if [ -f /Library/LaunchDaemons/com.github.remoteaccess.install.plist ]; then
+				logIt "Remote Access LaunchDaemon found." 
+				logIt "Unload Remote Access LaunchDaemon."
 				launchctl unload /Library/LaunchDaemons/com.github.remoteaccess.install.plist
+				logIt "Delete Remote Access LaunchDaemon." 
+				rm /Library/LaunchDaemons/com.github.remoteaccess.install.plist
+				else
+				logIt "Remote Access LaunchDaemon found." 
+				logIt "Remove Remote Access LaunchDaemon." 
+				launchctl remove com.github.remoteaccess.install
 			fi
-			logIt "remove /Library/LaunchDaemons/com.github.remoteaccess.install.plist" 
-			rm "/Library/LaunchDaemons/com.github.remoteaccess.install.plist"
-			sleep 3
-			logIt "Checking for SimpleGateway running as root. In case we're at loginwindow."
-			PROC=( `pgrep -d \  -u root osxwrapper`)  #spacing is correct
-			for i in ${PROC[*]}; do
-				ps -o command= $i | egrep "$SGpath51|$SGpath52" > /dev/null 2>&1 
-				isSG=$?
-				if [ $isSG = "0" ]; then
-					logIt "osxwrapper with PID $i is SimpleGateway running as root."  
-					logIt "kill $i" 
-					kill $i
-					else
-					logIt "No osxwrapper/SimpleGateway running as root"
-				fi
-				
-			done
-			PROC=( `pgrep -d \  -u root osxlauncher`) #spacing is correct
-			for i in ${PROC[*]}; do
-				ps -o command= $i | egrep "$SGpath51|$SGpath52" > /dev/null 2>&1
-				isSG=$?
-				if [ $isSG = "0" ]; then
-					logIt "osxlauncher with PID $i is SimpleGateway running as root." 
-					logIt "kill $i" 
-					kill $i
-					else
-					logIt "No osxlauncher/SimpleGateway running as root"
-				fi
-			done
 		fi
 	else
 	logIt "Remove /Library/Application Support/$supportDirName/.CleanUpInstall"
 	rm  "/Library/Application Support/$supportDirName/.CleanUpInstall"
 	fi
+	if [ -f /Library/LaunchDaemons/com.github.remoteaccess.install.plist ]; then
+		logIt "Delete Remote Access LaunchDaemon." 
+		rm /Library/LaunchDaemons/com.github.remoteaccess.install.plist
+	fi
 	}
 
+#killrootSG - this kills any SimpleGateway running as root. *Should* only encounter after install at login window
+function killrootSG {
+	logIt "Checking for SimpleGateway running as root. In case we're at loginwindow."
+	PROC=( `pgrep -d \  -u root osxwrapper`)  #spacing is correct
+	for i in ${PROC[*]}; do
+		ps -o command= $i | egrep "$SGpath51|$SGpath52" > /dev/null 2>&1 
+		isSG=$?
+		if [ $isSG = "0" ]; then
+			logIt "osxwrapper with PID $i is SimpleGateway running as root."  
+			logIt "kill $i" 
+			kill $i
+			else
+			logIt "No osxwrapper/SimpleGateway running as root"
+		fi
+	done
+	PROC=( `pgrep -d \  -u root osxlauncher`) #spacing is correct
+	for i in ${PROC[*]}; do
+		ps -o command= $i | egrep "$SGpath51|$SGpath52" > /dev/null 2>&1
+		isSG=$?
+		if [ $isSG = "0" ]; then
+			logIt "osxlauncher with PID $i is SimpleGateway running as root." 
+			logIt "kill $i" 
+			kill $i
+			else
+			logIt "No osxlauncher/SimpleGateway running as root"
+		fi
+	done
+	}	
+	
 #LaunchAgentRA - test if our LaunchAgent exists, if not create it.
 function LaunchAgentRA {
 	if [ ! -f /Library/LaunchAgents/$appDomain.plist ]; then
@@ -164,7 +174,10 @@ function LaunchAgentRA {
 		defaults write /Library/LaunchAgents/$appDomain.plist LimitLoadToSessionType -array LoginWindow
 		defaults write /Library/LaunchAgents/$appDomain.plist RunAtLoad -bool TRUE
 		defaults write /Library/LaunchAgents/$appDomain.plist ProgramArguments -array "$installDir/$appName/Contents/MacOS/$machName"
+		defaults write /Library/LaunchAgents/$appDomain.plist WorkingDirectory "$installDir/$appName/Contents/MacOS/"
 		defaults write /Library/LaunchAgents/$appDomain.plist AbandonProcessGroup -bool TRUE
+		defaults write /Library/LaunchAgents/$appDomain.plist StandardErrorPath "/Library/Logs/Remote Access/RemoteAccessERR.log"
+		defaults write /Library/LaunchAgents/$appDomain.plist StandardOutPath "/Library/Logs/Remote Access/RemoteAccessSTD.log"
 		chown root:wheel /Library/LaunchAgents/$appDomain.plist
 		chmod 644 /Library/LaunchAgents/$appDomain.plist
 	fi
@@ -308,15 +321,16 @@ function startSG {
 	logIt "Starting SimpleGateway as `whoami`" 
 	cd "/Library/Application Support/JWrapper-Remote Access/JWAppsSharedConfig/SimpleGatewayService" > /dev/null 2>&1
 	
-
 	[ -f "./Remote Access Service.app/Contents/MacOS/osxwrapper" ] && "./Remote Access Service.app/Contents/MacOS/osxwrapper"  &
 	[ -f "./SimpleGatewayService.app/Contents/MacOS/osxwrapper" ] && "./SimpleGatewayService.app/Contents/MacOS/osxwrapper"  &
+	
+	sleep 1
 	
 	PROC=( `pgrep -d \  -u root osxwrapper`)  #spacing is correct
 	for i in ${PROC[*]}; do
 		ps -o command= $i | egrep "$SGpath51|$SGpath52" > /dev/null 2>&1
 		isSG=$?
-		logIT "isSG = $isSG" 
+		logIt "isSG = $isSG" 
 		if [ $isSG = "0" ]; then
 			
 			logIt "Remote Access osxwrapper with PID $i is as root."
@@ -340,16 +354,18 @@ initializeLogging
 logIt "---- $appName v.$version start ----"
 #selfInstall - install in the correct directory
 selfInstall
-#cleanup after installer
-LaunchDaemonRACleanup
-# Test for Simple Gateway Running as user for
+# Installs Remote Access LaunchAgent (kind of the whole point of this.)
+LaunchAgentRA
+# Test for Simple Gateway and Remote Access.app, deploy if not present
 deploySG
 # Ensure SimpleGatway LaunchAgent is not installed or running
 LaunchAgentSG
+#cleanup after installer
+LaunchDaemonRACleanup
+#kill root SimpleGateway at login window
+killrootSG
 # ensure SimpleGateway is not running as user
 killUserSG
-# Installs Remote Access LaunchAgent (kind of the whole point of this.)
-LaunchAgentRA
 # startSG makes sure Simple Gateway is running as root if so ends the script
 #   Starts Simple Gateway as root regardless of v5.1.x or v5.2.x
 startSG

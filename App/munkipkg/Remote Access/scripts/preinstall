@@ -57,6 +57,7 @@ if [ -f "$launchdaemonPath" ];then
 	else
 	defaults write "$launchdaemonPath" Label "com.github.remoteaccess.install"
 	defaults write "$launchdaemonPath" ProgramArguments -array "/Library/Application Support/Remote Access/Remote Access.app/Contents/MacOS/Remote Access"
+	defaults write "$launchdaemonPath" WorkingDirectory "/Library/Application Support/Remote Access/Remote Access.app/Contents/MacOS/"
 	defaults write "$launchdaemonPath" RunAtLoad -bool true
 	defaults write "$launchdaemonPath" KeepAlive -bool false
 	
