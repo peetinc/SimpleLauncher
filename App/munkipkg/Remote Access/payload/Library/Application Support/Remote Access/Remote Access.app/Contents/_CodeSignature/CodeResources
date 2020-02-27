@@ -4,37 +4,52 @@
 <dict>
 	<key>files</key>
 	<dict>
-		<key>Resources/AppIcon.icns</key>
+		<key>Resources/AppIcon-RA.icns</key>
 		<data>
-		9ItkvGHMlJ7j7G7C03S6A6kXnNY=
+		s3kGxCgeueemVffrRYZ0CE7OmZI=
+		</data>
+		<key>Resources/Assets.car</key>
+		<data>
+		5XL9SDVbrOx+/7Zv63OSKHqEbRY=
 		</data>
 		<key>Resources/script</key>
 		<data>
-		1ctwwads/sQ0DHGfF2WX1j1SeFk=
+		SL5P7/SvQUAmbrzfSfzDKj2FAbw=
 		</data>
 	</dict>
 	<key>files2</key>
 	<dict>
-		<key>Resources/AppIcon.icns</key>
+		<key>Resources/AppIcon-RA.icns</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			9ItkvGHMlJ7j7G7C03S6A6kXnNY=
+			s3kGxCgeueemVffrRYZ0CE7OmZI=
 			</data>
 			<key>hash2</key>
 			<data>
-			8bLRyq18I+NIVxmtRTMeX30CxJEUJBChf6ZC62FZA4c=
+			3WDgnXGVN3dQXhdwOwKm3uA2xEqQagH7RdcxSfXGOyE=
+			</data>
+		</dict>
+		<key>Resources/Assets.car</key>
+		<dict>
+			<key>hash</key>
+			<data>
+			5XL9SDVbrOx+/7Zv63OSKHqEbRY=
+			</data>
+			<key>hash2</key>
+			<data>
+			sYRJK3d6GI7TbWazHNTJQJPZEW1UFbxF8f0GiR+Uck0=
 			</data>
 		</dict>
 		<key>Resources/script</key>
 		<dict>
 			<key>hash</key>
 			<data>
-			1ctwwads/sQ0DHGfF2WX1j1SeFk=
+			SL5P7/SvQUAmbrzfSfzDKj2FAbw=
 			</data>
 			<key>hash2</key>
 			<data>
-			0Q3A18cNCa5aYu1czGc64gxYERkq70qw8M51zVZOAFY=
+			mXV6aUbhWQ8m3JSfGxW70WWScdGITMKRAmQXsSJIlpo=
 			</data>
 		</dict>
 	</dict>
