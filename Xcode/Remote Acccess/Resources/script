@@ -21,51 +21,51 @@ logName=`/usr/libexec/PlistBuddy -c "Print :CFBundleName" "../Info.plist"`.log
 installVers="offline"
 
 #---These variables are concatenations of above or required information gathering
-#installDir - where the Remote Access Launcher app will live
-installDir="/Library/Application Support/$supportDirName"
-#appPath - full path to .app bundle
-appPath="$installDir/$appName"
-#logPath and logPath where do you want to log to?
-logDir="/Library/Logs/$supportDirName"
-logPath="$logDir/$logName"
-#SGpath - Since all instances of SimpleGateway are osxwrapper or osxlauncher, something unique to grep for in `ps -o command= PID`
-SGpath51="SimpleGatewayService.app"
-SGpath52="Remote Access Service.app"
-#consoleUSER - find the currently logged in user in order to ensure LaunchAgent is not loaded.
+#consoleUSER/UID - find the currently logged in user in order to ensure LaunchAgent is not loaded.
 consoleUSER=`stat -f%Su /dev/console`
 consoleUID=`id -u $consoleUSER`
-#location for the Info.plist for running and installed app bundle once script is running as app, "../Info.plist"
-if [ -f "../Info.plist" ]; then
-    version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "../Info.plist")
-    else
-    version=0
-fi
-if [ -f "$appPath/Contents/Info.plist" ];then
-    versionInstalled=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$appPath/Contents/Info.plist")
-    else
-    versionInstalled=0
-fi
-if /usr/libexec/PlistBuddy -c "Print :Version" "$launchagentPath"; then
-    LAversion=`/usr/libexec/PlistBuddy -c "Print :Version" "$launchagentPath"`
-    else
-    LAversion=0
-fi
-#location for Deployment Variables /Library/Preferences/$appDomain.plist.
-plistDir="/Library/Preferences"
-plistPath="$plistDir/$appDomain.plist"
-#Remote Access Install LaunchDaemon Label
-launchdaemonLabel="$appDomain.install"
-#Remote Access Install Installer LaunchDaemon Location
-launchdaemonPath="/Library/LaunchDaemons/$launchdaemonLabel.plist"
-#Remote Access LaunchAgent Label
-launchagentLabel="$appDomain"
-#Remote Access LaunchAgent Location
-launchagentPath="/Library/LaunchAgents/$launchagentLabel.plist"
-#simplehelp LaunchAgent Label
-shlaunchagentLabel="com.simplehelp.simplegateway"
-#simplehelp LaunchAgent Location
-shlaunchagentPath="/Library/LaunchAgents/$shlaunchagentLabel.plist"
-
+#Paths:
+    #installDir - where the Remote Access Launcher app will live
+    installDir="/Library/Application Support/$supportDirName"
+    #appPath - full path to .app bundle
+    appPath="$installDir/$appName"
+    #logPath and logPath where do you want to log to?
+    logDir="/Library/Logs/$supportDirName"
+    logPath="$logDir/$logName"
+    #SGpath - Since all instances of SimpleGateway are osxwrapper or osxlauncher, something unique to grep for in `ps -o command= PID`
+    SGpath51="SimpleGatewayService.app"
+    SGpath52="Remote Access Service.app"
+    #location for Deployment Variables /Library/Preferences/$appDomain.plist.
+    plistDir="/Library/Preferences"
+    plistPath="$plistDir/$appDomain.plist"
+    #Remote Access Install LaunchDaemon Label
+    launchdaemonLabel="$appDomain.install"
+    #Remote Access Install Installer LaunchDaemon Location
+    launchdaemonPath="/Library/LaunchDaemons/$launchdaemonLabel.plist"
+    #Remote Access LaunchAgent Label
+    launchagentLabel="$appDomain"
+    #Remote Access LaunchAgent Location
+    launchagentPath="/Library/LaunchAgents/$launchagentLabel.plist"
+    #simplehelp LaunchAgent Label
+    shlaunchagentLabel="com.simplehelp.simplegateway"
+    #simplehelp LaunchAgent Location
+    shlaunchagentPath="/Library/LaunchAgents/$shlaunchagentLabel.plist"
+#Versions
+    if [ -f "../Info.plist" ]; then
+        version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "../Info.plist")
+        else
+        version=0
+    fi
+    if [ -f "$appPath/Contents/Info.plist" ];then
+        versionInstalled=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$appPath/Contents/Info.plist")
+        else
+        versionInstalled=0
+    fi
+    if /usr/libexec/PlistBuddy -c "Print :Version" "$launchagentPath"; then
+        LAversion=`/usr/libexec/PlistBuddy -c "Print :Version" "$launchagentPath"`
+        else
+        LAversion=0
+    fi
 #doNotDelete used in check where app is running from and failsafe do not attempt to update
 echo $(cd "$(dirname "$0")"; pwd -P) | egrep "$installDir"
 doNotDelete=$?
@@ -184,17 +184,17 @@ function killrootSG {
     
 #LaunchAgentRA - test if our LaunchAgent exists, if not create it.
 function LaunchAgentRA {
-    if [ `echo $version | sed -e 's/\.//g'` > `echo $LAversion | sed -e 's/\.//g'` ]; then
-        logIt "$appName LaunchAgent not found."
+    if [ `echo $version | sed -e 's/\.//g'` -gt `echo $LAversion | sed -e 's/\.//g'` ]; then
+        logIt "$appName LaunchAgent not found or out of date."
         logIt "Creating $launchagentPath"
         defaults write "$launchagentPath" Label "$launchagentLabel"
         defaults write "$launchagentPath" LimitLoadToSessionType -array LoginWindow
         defaults write "$launchagentPath" RunAtLoad -bool TRUE
         defaults write "$launchagentPath" ProgramArguments -array "$appPath/Contents/MacOS/$machName"
-        defaults write "$launchagentPath" WorkingDirectory "$appPath/Contents/MacOS/"
+        defaults delete "$launchagentPath" WorkingDirectory
         defaults write "$launchagentPath" AbandonProcessGroup -bool TRUE
-        defaults write "$launchagentPath" StandardErrorPath "$logDir/RemoteAccessERR.log"
-        defaults write "$launchagentPath" StandardOutPath "$logDir/RemoteAccessSTD.log"
+        defaults write "$launchagentPath" StandardErrorPath "$logDir/$appName""ERR.log"
+        defaults write "$launchagentPath" StandardOutPath "$logDir/$appName""STD.log"
         defaults write "$launchagentPath" Version "$version"
         chown root:wheel "$launchagentPath"
         chmod 644 "$launchagentPath"
@@ -348,7 +348,6 @@ function startSG {
     for i in ${PROC[*]}; do
         ps -o command= $i | egrep "$SGpath51|$SGpath52" > /dev/null 2>&1
         isSG=$?
-        logIt "isSG = $isSG"
         if [ $isSG = "0" ]; then
             
             logIt "Remote Access osxwrapper with PID $i is as root."
@@ -370,6 +369,7 @@ function startSG {
 initializeLogging
 # startLogging
 logIt "---- $appName v.$version start ----"
+logIt "Current working directory is $CWD."
 #selfInstall - install in the correct directory
 selfInstall
 # Installs Remote Access LaunchAgent (kind of the whole point of this.)
