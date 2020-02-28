@@ -8,8 +8,10 @@ appDomain="com.github.remoteaccess"
 #location for Deployment Variables .var.plist, once the script is running as app, "../../../.vars.plist" is in the same directory as the app bundle.
 plistDir="/Library/Preferences"
 plistPath="$plistDir/$appDomain.plist"
+#LaunchDaemon Label
+launchdaemonLabel="$appDomain.install"
 #Installer LaunchDaemon Location
-launchdaemonPath="/Library/LaunchDaemons/$appDomain.install.plist"
+launchdaemonPath="/Library/LaunchDaemons/$launchdaemonLabel.plist"
 
 #SimpleHelp Deployment variables
 #serverURL SimpleHelp base server URL
@@ -46,23 +48,6 @@ fi
 serviceConfigGroup=`xmllint --xpath "string(//Name)" "$serviceConfig" | awk 'BEGIN{OFS=FS="/"};{$NF=";print $0}'`
 if [ -z "$serviceConfigGroup" ]; then
 	serviceConfigGroup="null"
-fi
-}
-
-#writeLaunchDaemon - drop in install launchdaemon"
-function writeLaunchDaemon {
-if [ -f "$launchdaemonPath" ];then
-	launchctl unload "$launchdaemonPath" > /dev/null 2>&1
-	rm "$launchdaemonPath"
-	else
-	defaults write "$launchdaemonPath" Label "com.github.remoteaccess.install"
-	defaults write "$launchdaemonPath" ProgramArguments -array "/Library/Application Support/Remote Access/Remote Access.app/Contents/MacOS/Remote Access"
-	defaults write "$launchdaemonPath" WorkingDirectory "/Library/Application Support/Remote Access/Remote Access.app/Contents/MacOS/"
-	defaults write "$launchdaemonPath" RunAtLoad -bool true
-	defaults write "$launchdaemonPath" KeepAlive -bool false
-	
-	chown root:wheel "$launchdaemonPath"
-	chmod 644 "$launchdaemonPath"
 fi
 }
 
@@ -104,6 +89,5 @@ fi
 
 checkExistingSettings
 writeDeployPlist
-writeLaunchDaemon
- 
+
 exit 0

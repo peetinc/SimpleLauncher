@@ -10,6 +10,10 @@ machName="Remote Access"
 appDomain="com.github.remoteaccess"
 #supportDirName - Name of /Library/Application Support folder and /Library/Logs Folder
 supportDirName="Remote Access"
+#LaunchDaemon Label
+launchdaemonLabel="$appDomain.install"
+#Installer LaunchDaemon Location
+launchdaemonPath="/Library/LaunchDaemons/$launchdaemonLabel.plist"
 
 #---These variables are concatenations of above or required information gathering
 #installDir - where the Remote Access Launcher app will live
@@ -28,24 +32,36 @@ infoLocation="../Info.plist"
 plistDir="/Library/Preferences"
 plistPath="$plistDir/$appDomain.plist"
 
-#loadLaunchDaemonRA - unloads and loads LaunchDemon to make sure deployment happens.
-function loadLaunchDaemonRA {
-touch "$installDir/.CleanUpInstall"
+#writeLaunchDaemon - drop in install launchdaemon"
+function writeLaunchDaemon {
+if [ -f "$launchdaemonPath" ];then
+	launchctl unload "$launchdaemonPath" > /dev/null 2>&1
+	rm "$launchdaemonPath"
+fi
 
-launchctl load "/Library/LaunchDaemons/com.github.remoteaccess.install.plist"
-#sleep 1
-#PROC=( `pgrep -d \ -u root "$machName"`)
-#isRunning=$?
-#
-#if [ $isRunning -eq 0 ];then
-#	echo "$appName with PID $PROC is as root."
-#	echo "---- $appName v.$versionInstalled exit 0 ----"
-#	exit 0
-#	else
-#	echo "$appName is not running as root."
-#	echo "---- $appName v.$versionInstalled exit 1 ----"
-#	exit 1
-#fi
+	defaults write "$launchdaemonPath" Label "$launchdaemonLabel"
+	defaults write "$launchdaemonPath" ProgramArguments -array "/Library/Application Support/Remote Access/Remote Access.app/Contents/MacOS/Remote Access"
+	defaults write "$launchdaemonPath" RunAtLoad -bool true
+	defaults write "$launchdaemonPath" KeepAlive -bool false
+	defaults write "$launchdaemonPath" LaunchOnlyOnce -bool true
+	
+	chown root:wheel "$launchdaemonPath"
+	chmod 644 "$launchdaemonPath"
 }
 
+
+#loadLaunchDaemonRA - unloads and loads LaunchDemon to make sure deployment happens.
+function loadLaunchDaemonRA {
+
+launchctl load "$launchdaemonPath"
+
+defaults write "$launchdaemonPath" Disabled -bool true
+chown root:wheel "$launchdaemonPath"
+chmod 644 "$launchdaemonPath"
+
+}
+
+writeLaunchDaemon
 loadLaunchDaemonRA
+
+exit 0

@@ -147,10 +147,6 @@ function sglaunchagentCleanup {
 
 #LaunchDaemonRACleanup - Delete installer-required LuanchDaemon
 function LaunchDaemonRACleanup {
-    if [ -f "$installDir/.CleanUpInstall" ]; then
-    	logIt "Remove $installDir/.CleanUpInstall"
-    	rm  "$installDir/.CleanUpInstall"
-    fi
     if [ -f "$launchdaemonPath" ]; then
     	logIt "Remove $launchdaemonPath"
     	rm "$launchdaemonPath"
