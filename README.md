@@ -18,4 +18,4 @@ Notes:
 
 Cheers.Peet
 
-![SimpleLauncher Logo](https://raw.githubusercontent.com/peetinc/SimpleLauncher/master/Code/Icons/icon.png)
+![SimpleLauncher Logo](https://raw.githubusercontent.com/peetinc/SimpleLauncher/master/Resources/XcodeProject/Remote%20Acccess/Images.xcassets/AppIcon-RA.appiconset/icon_256x256%402x.png)
