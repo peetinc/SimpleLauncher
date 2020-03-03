@@ -1,6 +1,8 @@
 # SimpleLauncher
-**2020.27.02 - Completely reworked and seems to work well now. MacOS Catalina made some "?documented?" changes to launchd that blocks the running of LaunchAgents and LaunchDaemons at startup. v1.2 is now an Xcode Objective-C wrapper around the same zsh script. I've included the STPrivilegedTask framwork in the hopes of working out a way to authenticate the app as root when double-clicked.
-The main script has been moved to ./Resources/XcodeProject/Remote Acccess/Resources/script**
+-**2020.28.02 - Completely reworked and seems to work well now. MacOS Catalina made some "?documented?" changes to launchd that blocks the running of LaunchAgents and LaunchDaemons at startup. v1.2.1 is now an Xcode Objective-C wrapper around the same zsh script. I've included the STPrivilegedTask framwork in the hopes of working out a way to authenticate the app as root when double-clicked.
+The main script has been moved to ./Resources/XcodeProject/Remote Acccess/Resources/script.
+I've validated the script with 10.11 - 10.15 and it seems quite stable now that it agressively quits every SimpleGateway before launching it's own.
+My hope is to add privlege escilation, but don't hold your breath.**
 
 A simple app to allow SimpleHelp to simply run as root on macOS.
 
